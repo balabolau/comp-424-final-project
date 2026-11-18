@@ -7,6 +7,39 @@ from constants import *
 import numpy as np
 import time
 
+def evaluate (board, reserves, player):
+    return 0
+
+def search (board, reserves, player, ply, deadline):
+    valid_moves_list =get_valid_moves(board, reserves, player)
+
+    best_move=None
+    best_score=-float("inf")
+
+
+
+    for move in valid_moves_list:
+        b, r=copy_state(board, reserves)
+        execute_move(b, r, player, move)
+        done, winner, why=check_endgame(b,r, 3-player, ply + 1)
+        if winner==player:
+            return move
+        score =evaluate(b,r, player)
+
+        if winner==3-player:
+            score=-10000000000
+        
+
+        if(score>best_score): 
+            best_score=score
+            best_move=move
+
+    return best_move
+    
+
+        
+
+
 @register_agent("student_agent")          # do not change this string
 class StudentAgent(Agent):
     def __init__(self):
@@ -14,6 +47,7 @@ class StudentAgent(Agent):
         within INIT_TIME_LIMIT seconds."""
         super().__init__()
         self.name = "StudentAgent"
+        self.counter=0
 
     def step(self, board, reserves, player, opponent):
         """Return the Move you want to play.
@@ -23,8 +57,14 @@ class StudentAgent(Agent):
         Agent.step in agents/agent.py explains each argument and the time limit.
         """
         start = time.perf_counter()
+        deadline=start+2
+        ply= 2*self.counter + player -1
+        self.counter +=1
+        
+    
+
         # ALLOW_MOVES and WIN_LENGTH (from constants) are the rule flags of this game.
         # helpers.get_valid_moves / check_winner already respect them; your own
         # move generator and evaluation function must too.
         # TODO: replace with your search. Keep (time.perf_counter() - start) < STEP_TIME_LIMIT - margin.
-        return random_move(board, reserves, player)
+        return search (board, reserves, player, ply, deadline)
