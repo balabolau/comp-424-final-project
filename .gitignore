@@ -27,3 +27,14 @@
 !/agents/student_agent.py
 
 !/game_rules.txt
+
+# Team dev files (never submitted: only student_agent.py and authors.yaml are)
+!/CONTRIBUTING.md
+
+!/tools/
+/tools/*
+!/tools/*.py
+
+!/results/
+/results/*
+!/results/*.md
