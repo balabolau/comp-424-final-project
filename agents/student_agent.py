@@ -2,13 +2,48 @@
 from agents.agent import Agent
 from store import register_agent
 from helpers import (Move, get_valid_moves, execute_move, check_winner,
-                     check_endgame, random_move, copy_state, top_view)
+                     check_endgame, random_move, copy_state, top_view, LINES)
 from constants import *
 import numpy as np
 import time
 
+
 def evaluate (board, reserves, player):
-    return 0
+        total_score=0
+
+        
+    
+        owners, sizes= top_view(board)
+        for line in LINES[WIN_LENGTH]:
+        
+            obstacle=False
+            score_1=0
+            score_2=0
+            for couple in line:
+                if owners[couple]==3:
+                    obstacle=True
+                     
+                
+                if owners[couple]==player:
+                    score_1+=1
+
+                elif owners[couple]==3-player:
+                    score_2+=1
+
+            if(obstacle!=False):
+                continue
+
+            if score_1>0 and score_2==0:
+                    total_score+= 10 ** score_1
+
+            elif score_2>0 and score_1==0:
+                    total_score-=10 ** score_2
+
+
+        return total_score
+
+            
+
 
 def search (board, reserves, player, ply, deadline):
 
