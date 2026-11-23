@@ -63,7 +63,7 @@ def evaluate (board, reserves, player):
                 
                 # if we are able to cover each block in the line, we give it a good score, but less good then open line
                  if  can_cover:
-                      total_score+= 5** score_1
+                      total_score+= 10** score_1 //2
 
 
                 # Here we do the exact same thing but for the other players view
@@ -83,7 +83,7 @@ def evaluate (board, reserves, player):
                                 
                 
                  if  he_can_cover:
-                  total_score-= 5** score_2
+                  total_score-= 10** score_2 //2
 
 
 
