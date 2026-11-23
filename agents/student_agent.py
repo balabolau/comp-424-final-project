@@ -12,15 +12,16 @@ def evaluate (board, reserves, player):
         total_score=0
 
         
-    
+        #get the owner and size of each block on each square
         owners, sizes= top_view(board)
+        # for every line of size 4, so 4 columns, 4 rows, 2 diagonlas
         for line in LINES[WIN_LENGTH]:
-        
-            obstacle=False
+            
+            obstacle=False #set a variable to false so we dont give an accidental score to a line with a obstacle
             score_1=0
             score_2=0
-            for couple in line:
-                if owners[couple]==3:
+            for couple in line: #each couple is one sqaure in the line, there is 4
+                if owners[couple]==3: #when the owner is 3, that mean there is an obstacle
                     obstacle=True
                      
                 
@@ -29,17 +30,65 @@ def evaluate (board, reserves, player):
 
                 elif owners[couple]==3-player:
                     score_2+=1
-
+            #this is so we skip the scoring
             if(obstacle!=False):
                 continue
-
+            #we only score lines occupied by 1 player only, and we scale the score by a 10 factor
             if score_1>0 and score_2==0:
                     total_score+= 10 ** score_1
 
             elif score_2>0 and score_1==0:
                     total_score-=10 ** score_2
+            #now we score lines that are mixed, so both players occupy
+            elif score_1>0 and score_2>0:
+
+                 #make a copy of the reserve because we will need to modify it
+                 reserves_copy=reserves.copy()
+                 can_cover=True
+                 #we recheck each couple in line
+                 for couple in line:
+                      bigger=False
+                     #here we check the owner is the other player
+                      if owners[couple]==3-player:
+                           #then we check indices of blocks only bigger then the other players block
+                           for i in range (sizes[couple]+1, 3):
+                                if (not bigger):
+                                    #if we have at least 1 bigger, we remove it from the copy reserve and set bigger to true to not double count bigger blocks
+                                    if reserves_copy[player,i]>0:
+                                        reserves_copy[player,i]-=1
+                                        bigger=True 
+
+                           if not bigger: # if bigger stayed false through that line, we had no block in the reserve to cover it
+                                can_cover=False
+                
+                # if we are able to cover each block in the line, we give it a good score, but less good then open line
+                 if  can_cover:
+                      total_score+= 5** score_1
 
 
+                # Here we do the exact same thing but for the other players view
+                 reserves_copy=reserves.copy()
+                 he_can_cover=True
+                 for couple in line:
+                    bigger=False
+                    if owners[couple]==player:
+                        for i in range (sizes[couple]+1, 3):
+                            if (not bigger):
+                                if reserves_copy[3-player,i]>0:
+                                    reserves_copy[3-player,i]-=1
+                                    bigger=True
+                
+                        if not bigger: 
+                            he_can_cover=False
+                                
+                
+                 if  he_can_cover:
+                  total_score-= 5** score_2
+
+
+
+                      
+    
         return total_score
 
             
