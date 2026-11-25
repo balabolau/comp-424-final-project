@@ -49,6 +49,8 @@ def pool (player, reserves, player_1, player_2, line, owners,sizes):
 
 def evaluate (board, reserves, player):
         total_score=0
+        threats=0
+        his_threats=0
 
         
         #get the owner and size of each block on each square
@@ -77,12 +79,16 @@ def evaluate (board, reserves, player):
                 continue
             #we only score lines occupied by 1 player only, and we scale the score by a 10 factor
             if score_1>0 and score_2==0:
+                    if score_1==3:
+                        threats+=1
                     total_score+= 10 ** score_1
 
             elif score_2>0 and score_1==0:
                     #if opponent has 3 pieces, worsen the score since he can win
                     if score_2==3:
+                    
                         total_score-=10 ** score_2 *100
+                        his_threats+=1
 
                     else:
                         total_score-=10 ** score_2
@@ -109,6 +115,8 @@ def evaluate (board, reserves, player):
                 
                 # if we are able to cover each block in the line, we give it a good score, but less good then open line
                  if  can_cover:
+                      if score_1==3:
+                          threats+=1
                       total_score+= 10** score_1 //2
 
 
@@ -132,8 +140,11 @@ def evaluate (board, reserves, player):
                     #added the same evalutaion for when the other player has 3 in one line
                     if score_2==3:
                         total_score-=10** score_2 //2 *100
+                        his_threats+=1
                     else:
                         total_score-= 10** score_2 //2
+        if threats>=2 and his_threats==0:
+            total_score+=100000
 
 
 
