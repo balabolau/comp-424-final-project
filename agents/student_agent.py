@@ -7,13 +7,16 @@ from constants import *
 import numpy as np
 import time
 
+
+# weight of material in total_score
+W_MATERIAL = 1
 # weights per piece, [S, M, L]
 WEIGHTS = [1, 2, 3]
 # factor to prefer moving a piece on the board instead of taking out of reserve
 PREF = 0.5
 
 
-def material(board, reserves, player):
+def material(board, reserves, player, owners, sizes):
     m_score = 0
     # for each piece size, subtract opponent's available pieces from player's, then multiply by weight
     for size in range(NUM_SIZES):
@@ -21,7 +24,6 @@ def material(board, reserves, player):
 
     # for each cell, add weight of piece for player, subtract weight of piece of opponent
     # a piece on the board weighs less than a piece in reserve, because we prefer moving a piece on the board than wasting a reserve piece for a similar gain, since reserve pieces are guaranteed flexibility
-    owners, sizes = top_view(board)
     for row in range(board.shape[0]):
         for col in range(board.shape[1]):
             if owners[row, col] == player:
@@ -49,6 +51,8 @@ def pieces_on_board (owners, sizes,player):
                 player_2[sizes[r,c]]+=1
 
     return player_1, player_2
+
+
 #helper function to pool together the reserve and the pieces on the board
 def pool (player, reserves, player_1, player_2, line, owners,sizes):
      pool_1=[0,0,0]
@@ -67,12 +71,6 @@ def pool (player, reserves, player_1, player_2, line, owners,sizes):
      return pool_1, pool_2
          
     
-
-
-
-        
-
-
 def evaluate (board, reserves, player):
         total_score=0
 
@@ -159,12 +157,10 @@ def evaluate (board, reserves, player):
                     if score_2==3:
                         total_score-=10** score_2 //2 *100
                     else:
-                        total_score-= 10** score_2 //2
+                        total_score-= 10** score_2 //2                
 
 
-
-                      
-    
+        total_score += W_MATERIAL * material(board, reserves, player, owners, sizes)
         return total_score
 
             
