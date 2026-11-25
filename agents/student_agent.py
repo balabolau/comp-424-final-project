@@ -167,7 +167,7 @@ def evaluate (board, reserves, player):
                         his_threats+=1
                     else:
                         total_score-= 10** score_2 //2                
-                        total_score-= 10** score_2 //2
+                    
         if threats>=2 and his_threats==0:
             total_score+=100000
 
