@@ -11,25 +11,30 @@ def evaluate (board, reserves, player):
     return 0
 
 def search (board, reserves, player, ply, deadline):
-    valid_moves_list =get_valid_moves(board, reserves, player)
 
+    #get all valid moves from present board
+    valid_moves_list =get_valid_moves(board, reserves, player)
+    #this will be the variable that keeps track of the best move
     best_move=None
+    #best score starts at worst value
     best_score=-float("inf")
 
 
-
+    #for each move, copy current state, execute the move and gets its score
     for move in valid_moves_list:
         b, r=copy_state(board, reserves)
         execute_move(b, r, player, move)
         done, winner, why=check_endgame(b,r, 3-player, ply + 1)
+        #if move is winner, do that move 
         if winner==player:
             return move
+        #here all other moves are 0 since eval is 0 for all moves
         score =evaluate(b,r, player)
-
+        #except if move makes other player win, then give bad score so it never picks it
         if winner==3-player:
             score=-10000000000
         
-
+        #keep updating best move
         if(score>best_score): 
             best_score=score
             best_move=move
@@ -56,6 +61,7 @@ class StudentAgent(Agent):
                player, opponent - your player number (1 or 2) and the other one.
         Agent.step in agents/agent.py explains each argument and the time limit.
         """
+        
         start = time.perf_counter()
         deadline=start+2
         ply= 2*self.counter + player -1
