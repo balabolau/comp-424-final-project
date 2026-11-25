@@ -49,7 +49,7 @@ def pool (player, reserves, player_1, player_2, line, owners,sizes):
 
 def evaluate (board, reserves, player):
         total_score=0
-        threats=0
+        threats=0 
         his_threats=0
 
         
