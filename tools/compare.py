@@ -19,14 +19,14 @@ SEED = 1
 def log(opp, returncode, stderr, stdout, pairs=args.pairs):
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     with open(LOG_PATH, "a") as f:
-        f.write(f"{stamp}")
+        f.write(f"{stamp}\n" )
         f.write(f"student_agent vs {opp} on {2*pairs} games on seed {SEED}")
         f.write("\n")
         f.write(stdout)
         if returncode != 0:
-            f.write(returncode)
-            f.write(stderr)
-        f.write("\n\n")
+            f.write(f"Return code: {returncode}\n")
+            f.write(f"Stderr: {stderr}\n")
+        f.write("\n")
 
 
 # execute simulator.py for student_agent with passed arguments, same seed everytime to compare logs

@@ -7,6 +7,34 @@ from constants import *
 import numpy as np
 import time
 
+
+# weight of material in total_score
+W_MATERIAL = 1
+# weights per piece, [S, M, L]
+WEIGHTS = [1, 2, 3]
+# factor to prefer moving a piece on the board instead of taking out of reserve
+PREF = 0.5
+
+
+def material(board, reserves, player, owners, sizes):
+    m_score = 0
+    # for each piece size, subtract opponent's available pieces from player's, then multiply by weight
+    for size in range(NUM_SIZES):
+        m_score = m_score + (WEIGHTS[size]) * (reserves[player, size] - reserves[3 - player, size])
+
+    # for each cell, add weight of piece for player, subtract weight of piece of opponent
+    # a piece on the board weighs less than a piece in reserve, because we prefer moving a piece on the board than wasting a reserve piece for a similar gain, since reserve pieces are guaranteed flexibility
+    for row in range(board.shape[0]):
+        for col in range(board.shape[1]):
+            if owners[row, col] == player:
+                m_score = m_score + PREF*WEIGHTS[sizes[row, col]]
+
+            if owners[row, col] == (3 - player):
+                m_score = m_score - PREF*WEIGHTS[sizes[row, col]]        
+
+    return m_score
+
+
 #helper function to count the pieces on the board
 def pieces_on_board (owners, sizes,player):
     # 2 arrays for the 2 players, where indices are piece size
@@ -23,6 +51,8 @@ def pieces_on_board (owners, sizes,player):
                 player_2[sizes[r,c]]+=1
 
     return player_1, player_2
+
+
 #helper function to pool together the reserve and the pieces on the board
 def pool (player, reserves, player_1, player_2, line, owners,sizes):
      pool_1=[0,0,0]
@@ -41,12 +71,6 @@ def pool (player, reserves, player_1, player_2, line, owners,sizes):
      return pool_1, pool_2
          
     
-
-
-
-        
-
-
 def evaluate (board, reserves, player):
         total_score=0
         threats=0 
@@ -142,14 +166,13 @@ def evaluate (board, reserves, player):
                         total_score-=10** score_2 //2 *100
                         his_threats+=1
                     else:
-                        total_score-= 10** score_2 //2
+                        total_score-= 10** score_2 //2                
+                    
         if threats>=2 and his_threats==0:
             total_score+=100000
 
 
-
-                      
-    
+        total_score += W_MATERIAL * material(board, reserves, player, owners, sizes)
         return total_score
 
             
