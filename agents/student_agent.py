@@ -7,6 +7,45 @@ from constants import *
 import numpy as np
 import time
 
+#helper function to count the pieces on the board
+def pieces_on_board (owners, sizes,player):
+    # 2 arrays for the 2 players, where indices are piece size
+    player_1=[0,0,0]
+    player_2=[0,0,0]
+    for r in range(BOARD_SIZE):
+        for c in range(BOARD_SIZE):
+            #looping over each column and rows, you check who is the owner, and add 1 in the array according to the size of the piece on the board
+    
+            if owners[r,c]==player:
+                player_1[sizes[r,c]]+=1
+
+            elif owners[r,c] == 3-player:
+                player_2[sizes[r,c]]+=1
+
+    return player_1, player_2
+#helper function to pool together the reserve and the pieces on the board
+def pool (player, reserves, player_1, player_2, line, owners,sizes):
+     pool_1=[0,0,0]
+     pool_2=[0,0,0]
+     # you just add up the pieces on the board and the reserve
+     for i in range (3):
+         pool_1[i]=reserves[player,i] + player_1[i]
+         pool_2[i]=reserves[3-player,i] + player_2[i]
+    #for each couple in the line we are in, you delete the pieces on the line since they cant be moved
+     for couple in line:
+        if owners[couple]==player:
+            pool_1[sizes[couple]]-=1
+        elif owners[couple]==3-player:
+            pool_2[sizes[couple]]-=1
+
+     return pool_1, pool_2
+         
+    
+
+
+
+        
+
 
 def evaluate (board, reserves, player):
         total_score=0
@@ -14,6 +53,7 @@ def evaluate (board, reserves, player):
         
         #get the owner and size of each block on each square
         owners, sizes= top_view(board)
+        player_1, player_2=pieces_on_board(owners, sizes, player)
         # for every line of size 4, so 4 columns, 4 rows, 2 diagonlas
         for line in LINES[WIN_LENGTH]:
             
@@ -30,6 +70,8 @@ def evaluate (board, reserves, player):
 
                 elif owners[couple]==3-player:
                     score_2+=1
+
+
             #this is so we skip the scoring
             if(obstacle!=False):
                 continue
@@ -38,12 +80,16 @@ def evaluate (board, reserves, player):
                     total_score+= 10 ** score_1
 
             elif score_2>0 and score_1==0:
-                    total_score-=10 ** score_2
+                    #if opponent has 3 pieces, worsen the score since he can win
+                    if score_2==3:
+                        total_score-=10 ** score_2 *100
+
+                    else:
+                        total_score-=10 ** score_2
             #now we score lines that are mixed, so both players occupy
             elif score_1>0 and score_2>0:
 
-                 #make a copy of the reserve because we will need to modify it
-                 reserves_copy=reserves.copy()
+                 pool_1,pool_2=pool(player,reserves,player_1,player_2,line,owners,sizes)
                  can_cover=True
                  #we recheck each couple in line
                  for couple in line:
@@ -54,8 +100,8 @@ def evaluate (board, reserves, player):
                            for i in range (sizes[couple]+1, 3):
                                 if (not bigger):
                                     #if we have at least 1 bigger, we remove it from the copy reserve and set bigger to true to not double count bigger blocks
-                                    if reserves_copy[player,i]>0:
-                                        reserves_copy[player,i]-=1
+                                    if pool_1[i]>0 :
+                                        pool_1[i]-=1
                                         bigger=True 
 
                            if not bigger: # if bigger stayed false through that line, we had no block in the reserve to cover it
@@ -67,15 +113,15 @@ def evaluate (board, reserves, player):
 
 
                 # Here we do the exact same thing but for the other players view
-                 reserves_copy=reserves.copy()
+                
                  he_can_cover=True
                  for couple in line:
                     bigger=False
                     if owners[couple]==player:
                         for i in range (sizes[couple]+1, 3):
                             if (not bigger):
-                                if reserves_copy[3-player,i]>0:
-                                    reserves_copy[3-player,i]-=1
+                                if pool_2[i]>0:
+                                    pool_2[i]-=1
                                     bigger=True
                 
                         if not bigger: 
@@ -83,7 +129,11 @@ def evaluate (board, reserves, player):
                                 
                 
                  if  he_can_cover:
-                  total_score-= 10** score_2 //2
+                    #added the same evalutaion for when the other player has 3 in one line
+                    if score_2==3:
+                        total_score-=10** score_2 //2 *100
+                    else:
+                        total_score-= 10** score_2 //2
 
 
 
