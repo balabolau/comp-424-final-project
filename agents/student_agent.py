@@ -7,6 +7,30 @@ from constants import *
 import numpy as np
 import time
 
+# weights per piece, [S, M, L]
+WEIGHTS = [1, 2, 3]
+# factor to prefer moving a piece on the board instead of taking out of reserve
+PREF = 0.5
+
+
+def material(board, reserves, player):
+    m_score = 0
+    # for each piece size, subtract opponent's available pieces from player's, then multiply by weight
+    for size in range(NUM_SIZES):
+        m_score = m_score + (WEIGHTS[size]) * (reserves[player, size] - reserves[3 - player, size])
+
+    # for each cell, add weight of piece for player, subtract weight of piece of opponent
+    # a piece on the board weighs less than a piece in reserve, because we prefer moving a piece on the board than wasting a reserve piece for a similar gain, since reserve pieces are guaranteed flexibility
+    owners, sizes = top_view(board)
+    for row in range(board.shape[0]):
+        for col in range(board.shape[1]):
+            if owners[row, col] == player:
+                m_score = m_score + PREF*WEIGHTS[sizes[row, col]]
+
+            if owners[row, col] == (3 - player):
+                m_score = m_score - PREF*WEIGHTS[sizes[row, col]]        
+
+    return m_score
 
 def evaluate (board, reserves, player):
         total_score=0
